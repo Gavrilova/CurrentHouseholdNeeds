@@ -1,3 +1,6 @@
+package tests;
+
+import model.YI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,18 +20,18 @@ import java.util.List;
 import static java.lang.Integer.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 
 /**
- * Created by irinagavrilova on 4/29/18.
- * This script was created for saving images on macOS form fotki.yandex service which was demolished and transformed further to disk.yandex;
+ * Created by irinagavrilova on 5/3/18.
  */
+public class Yandex {
 
-public class YandexFoldersImproved {
+
   private ChromeDriver driver;
 
-  public void createFolders(String folderName, String user) {
-    File dir = new File("/Users/irinagavrilova/Downloads/Images/" + user + "/Temp/" + folderName);
+  public void createFolderTree(String folderName, String user) {
+    File dir = new File("/Users/irinagavrilova/Downloads/tests.Yandex/Folders/" + user + "/" + folderName);
     if (!dir.exists()) {
       try {
         System.out.println("Folder " + folderName + " was created " + dir.mkdirs());
@@ -76,15 +79,13 @@ public class YandexFoldersImproved {
   public String getUrl(String st) {
     driver.get(st);
     WebDriverWait wait = new WebDriverWait(driver, 10);
-    wait.until(visibilityOfElementLocated(By.cssSelector("img.image.js-image")));
+    wait.until(presenceOfElementLocated(By.cssSelector("img.image.js-image")));
     List<WebElement> elementListList = driver.findElements(By.cssSelector("img.image.js-image"));
     ArrayList<String> urlList = new ArrayList<>();
     for (WebElement e : elementListList) {
       urlList.add(e.getAttribute("src"));
     }
-    //String imageURL = driver.findElement(By.cssSelector("img.image.js-image")).getAttribute("src");
     String imageURL = maxSizeOfX(urlList);
-    //System.out.println(imageURL);
     return imageURL;
   }
 
@@ -108,7 +109,7 @@ public class YandexFoldersImproved {
     YI data = new YI();
     driver.get(st);
     WebDriverWait wait = new WebDriverWait(driver, 10);
-    wait.until(visibilityOfElementLocated(By.cssSelector("img.image.js-image")));
+    wait.until(presenceOfElementLocated(By.cssSelector("img.image.js-image")));
 
     List<WebElement> elementListList = driver.findElements(By.cssSelector("img.image.js-image"));
     ArrayList<String> urlList = new ArrayList<>();
@@ -117,15 +118,13 @@ public class YandexFoldersImproved {
     }
 
     String imageURL = maxSizeOfX(urlList);
-    //add empty URL, Name, Album case!!!
     data.withImageUrl(imageURL);
-
-    String albumName = driver.findElement(By.cssSelector("a.js-album-link")).getText();
-    data.withImageAlbum(albumName);
-
     String imageName = driver.findElement(By.cssSelector("div.photo-title__value")).getText();
     data.withImageName(getJPGname(imageName));
-
+    String albumName = driver.findElement(By.cssSelector("a.js-album-link")).getText();
+    data.withImageAlbum(albumName);
+    String parentAlbumLink = driver.findElement(By.cssSelector("a.js-album-link")).getAttribute("href");
+    data.withImageParentAlbumLink(parentAlbumLink);
     return data;
   }
 
@@ -146,7 +145,7 @@ public class YandexFoldersImproved {
 
       WebDriverWait wait = new WebDriverWait(driver, 10);
       driver.get(hrmUrl);
-      wait.until(visibilityOfElementLocated(By.cssSelector("a.photo img")));
+      wait.until(presenceOfElementLocated(By.cssSelector("a.photo img")));
       anotherOne = doWeHaveAnotherPageToSave();
       List<WebElement> photoLinks = driver.findElements(By.cssSelector("a.photo"));
       for (WebElement partialLink : photoLinks) {
@@ -154,14 +153,27 @@ public class YandexFoldersImproved {
         photos.add(link);
       }
 
-      //photos.forEach(System.out::println);
       photos.forEach(e -> imageData.add(getUrlAndAlbum(e)));
+
+      ArrayList<String> parentAlbumTemp = new ArrayList<>();
+      imageData.forEach(e -> parentAlbumTemp.add(e.getImageParentAlbumLink()));
+
+      imageData.get(0).withImageParentAlbumLink(getParentAlbumString(imageData.get(0), wait));
+
+      for (int i = 1; i < imageData.size(); i++) {
+        if (imageData.get(i).getImageParentAlbumLink().equals(parentAlbumTemp.get(i - 1))) {
+          imageData.get(i).withImageParentAlbumLink(imageData.get(i - 1).getImageParentAlbumLink());
+        } else {
+          imageData.get(i).withImageParentAlbumLink(getParentAlbumString(imageData.get(i), wait));
+        }
+      }
+
 
       for (int i = 0; i < photos.size(); i++) {
         try {
           //reading url
           String url = imageData.get(i).getImageUrl();
-          String albumName = imageData.get(i).getImageAlbum();
+          String albumName = imageData.get(i).getImageParentAlbumLink();
           if (albumName.isEmpty()) {
             albumName = "noAlbumName";
           }
@@ -169,9 +181,12 @@ public class YandexFoldersImproved {
           if (name.isEmpty()) {
             name = Long.toString(currentTimeMillis());
           }
-          //need to assert file.exist() for saved image and created folder
-          createFolders(albumName, user);
+          //assert file.exist() for saved images and created folders
+          createFolderTree(albumName, user);
           String imgPath = "/Users/irinagavrilova/Downloads/Images/" + user + "/Temp/" + albumName + "/" + name;
+          if ((new File(imgPath)).exists()) {
+            imgPath = "/Users/irinagavrilova/Downloads/Images/" + user + "/Temp/" + albumName + "/" + Long.toString(currentTimeMillis()) + name;
+          }
           //read url and retrieve an image
           BufferedImage image = ImageIO.read(new URL(url));
           if (image != null) {
@@ -185,10 +200,18 @@ public class YandexFoldersImproved {
       }
       System.out.println("Page " + j + " was saved");
       j++;
-
-      //assert that there is no next page
     }
 
+  }
+
+  public String getParentAlbumString(YI element, WebDriverWait wait) {
+    driver.get(element.getImageParentAlbumLink());
+    wait.until(presenceOfElementLocated(By.cssSelector("span.title")));
+    String result = driver.findElement(By.cssSelector("span.title")).getText().replace("«", "").replace("»", "");
+    if ((result.substring(0, 7)).equals("Альбом ")) {
+      result = result.substring(7);
+    }
+    return result;
   }
 
 
@@ -200,54 +223,31 @@ public class YandexFoldersImproved {
     driver = new ChromeDriver(options);
   }
 
-
-  //cool-arina14, 1612, 350 альбомов, 32237 фото
   @Test
-  public void testImagesFoldersCoolArina14() throws InterruptedException {
-    AllImages("cool-arina14", 223);
+  public void testsnezinka11() throws InterruptedException {
+    AllImages("snezinka11", 145);
   }
 
-/*  @Test
-  public void testCreationFolder() throws InterruptedException {
-    createFolders("NewFolderTemp", "cool-arina14");
-  }*/
-
-/*  @Test
-  public void testNextPage() throws InterruptedException {
-    int j = 1611;
-    String user = "cool-arina14";
-    String hrmUrl = "https://fotki.yandex.ru/users/" + user + "/?&p=" + j;
-
-
-    WebDriverWait wait = new WebDriverWait(driver, 10);
-    driver.get(hrmUrl);
-    wait.until(visibilityOfElementLocated(By.cssSelector("a.photo img")));
-    System.out.println("\n" + doWeHaveAnotherPageToSave());
-  }*/
-/*
-  /////////////////////////////////////////////////////////////////////////////////
-  Her photos was already moved to yandex disk. Script will not be valid for it.
-  ///oksuporova, 24 альбома, 7797 фото.
   @Test
-  public void testOksuporova() throws InterruptedException{
-    AllImages("oksuporova", 390);
-  }
-*/
-
-
-  //3 483 альбома, 108605 фото, alyona-merletto", 5431
-/*  @Test
-  public void testMAlyonaMerletto() throws InterruptedException {
-    AllImages("alyona-merletto");
+  public void testnataButencko2010() throws InterruptedException {
+    AllImages("nata-butencko2010");
   }
 
-
-  //302 альбома, 5169 фото, "mitrofan-alyabjev", 259
   @Test
-  public void testMitrofanAlyabjev() throws InterruptedException {
-    AllImages("mitrofan-alyabjev");
-  }*/
+  public void testolgavadimov() throws InterruptedException {
+    AllImages("olgavadimov", 6);
+  }
 
+  @Test
+  public void testAlyonaMerletto() throws InterruptedException {
+    AllImages("alyona-merletto", 4817);
+  }
+
+  @Test
+  public void testLiubovBrajuk() throws InterruptedException {
+    AllImages("liubov-brajuk", 303);
+    //253
+  }
 
   @After
   public void stop() {
@@ -255,3 +255,6 @@ public class YandexFoldersImproved {
     driver = null;
   }
 }
+
+
+

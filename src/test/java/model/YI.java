@@ -1,3 +1,4 @@
+package model;
 
 /**
  * Created by irinagavrilova on 4/28/18.
@@ -7,7 +8,7 @@ public class YI {
   private String imageName;
   private String imageAlbum;
   private String imageUrl;
-
+  private String imageParentAlbumLink;
 
   public YI withImageName(String imageName) {
     this.imageName = imageName;
@@ -24,6 +25,11 @@ public class YI {
     return this;
   }
 
+  public YI withImageParentAlbumLink(String imageParentAlbumLink) {
+    this.imageParentAlbumLink = imageParentAlbumLink;
+    return this;
+  }
+
   public String getImageName() {
     return imageName;
   }
@@ -35,5 +41,10 @@ public class YI {
 
   public String getImageUrl() {
     return imageUrl;
+  }
+
+
+  public String getImageParentAlbumLink() {
+    return imageParentAlbumLink;
   }
 }
