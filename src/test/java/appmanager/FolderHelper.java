@@ -17,7 +17,9 @@ public class FolderHelper extends YandexHelperBase {
   }
 
   public void createFolderTree(String folderName, String user) {
-    File dir = new File("/Users/irinagavrilova/Downloads/tests.Yandex/Folders/" + user + "/" + folderName);
+    File dir = new File("/Users/irinagavrilova/Downloads/Images/" + user + "/Temp1/" + folderName);
+    //File dir = new File("/Users/irinagavrilova/Downloads/tests.Yandex/Folders/" + user + "/" + folderName);
+    //"/Users/irinagavrilova/Downloads/Images/" + user + "/Temp1/" + albumName + "/"
     if (!dir.exists()) {
       try {
         System.out.println("Folder " + folderName + " was created " + dir.mkdirs());

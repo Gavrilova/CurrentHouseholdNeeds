@@ -2,8 +2,9 @@ package appmanager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 
 /**
  * Created by irinagavrilova on 5/7/18.
@@ -21,6 +22,6 @@ public class SessionHelper extends YandexHelperBase {
     type(By.name("login"), username);
     type(By.name("passwd"), password);
     click(By.className("passport-Button-Text"));
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("span.mail-Logo-Pancakes")));
+    wait.until(presenceOfElementLocated(By.cssSelector("span.mail-Logo-Pancakes")));
   }
 }

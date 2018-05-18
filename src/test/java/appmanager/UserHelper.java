@@ -24,6 +24,7 @@ public class UserHelper extends YandexHelperBase {
     listOptions.forEach(e -> albumId.add(e.getAttribute("value")));
     return albumId;
   }
+
 }
 
 

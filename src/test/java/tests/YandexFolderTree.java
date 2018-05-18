@@ -12,14 +12,13 @@ public class YandexFolderTree extends TestBase {
   private ChromeDriver driver;
 
   public void tree(String user) {
-
+    //creating albums tree for user from fotki.yandex
     app.goTo().gotoYandexMainPage();
     app.goTo().gotoPage((By.cssSelector("div a.button")), "div.passport-Domik");
     app.signIn().loginYandex("myYandexUserName", "myYandexPassword");
     String url = "https://m.fotki.yandex.ru/users/" + user + "/";
     app.goTo().gotoPage(url, By.name("album_id"));
     app.user().getListOfAlbums(user).forEach(e -> app.folder().getFolders(e, user));
-
   }
 
   @Test

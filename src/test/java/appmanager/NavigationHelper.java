@@ -2,9 +2,9 @@ package appmanager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 /**
@@ -28,14 +28,14 @@ public class NavigationHelper extends YandexHelperBase {
     click(locator);
   }
 
-  public void gotoPage(By locator0, String locator1) {
-    click(locator0);
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(locator1)));
+  public void gotoPage(By locatorToClick, String locatorToPresent) {
+    click(locatorToClick);
+    wait.until(presenceOfElementLocated(By.cssSelector(locatorToPresent)));
   }
 
   public void gotoPage(String url, By locator) {
     driver.navigate().to(url);
-    wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+    wait.until(presenceOfElementLocated(locator));
     //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
   }
 

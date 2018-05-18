@@ -19,6 +19,8 @@ public class ApplicationManager {
   private SessionHelper sessionHelper;
   private NavigationHelper navigationHelper;
   private UserHelper userHelper;
+  private AlbumHelper albumHelper;
+  private ImageHelper imageHelper;
 
   public void start() {
 
@@ -32,6 +34,8 @@ public class ApplicationManager {
     navigationHelper = new NavigationHelper(driver);
     sessionHelper = new SessionHelper(driver);
     userHelper = new UserHelper(driver);
+    albumHelper = new AlbumHelper(driver);
+    imageHelper = new ImageHelper(driver);
   }
 
   public void stop() {
@@ -58,4 +62,8 @@ public class ApplicationManager {
   public UserHelper user() {
     return userHelper;
   }
+
+  public AlbumHelper album() {return albumHelper;}
+
+  public ImageHelper image() {return imageHelper;}
 }
