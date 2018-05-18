@@ -18,7 +18,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElemen
  */
 public class AlbumHelper extends YandexHelperBase {
 
-  public AlbumHelper (WebDriver driver) {super(driver);}
+  public AlbumHelper(WebDriver driver) {
+    super(driver);
+  }
+
   public WebDriverWait wait = new WebDriverWait(driver, 10);
 
   public String maxSizeOfX(ArrayList<String> arrayList) {
@@ -125,14 +128,11 @@ public class AlbumHelper extends YandexHelperBase {
 
 
   public ArrayList<YI> getImageData(ArrayList<String> photos) {
-    //ArrayList<String> photos, ArrayList<YI> imageData
-
     ArrayList<YI> imageData = new ArrayList<>();
     photos.forEach(e -> imageData.add(getUrlAndAlbum(e)));
 
     ArrayList<String> parentAlbumTemp = new ArrayList<>();
     imageData.forEach(e -> parentAlbumTemp.add(e.getImageParentAlbumLink()));
-
     imageData.get(0).withImageParentAlbumLink(getParentAlbumString(imageData.get(0), wait));
 
     for (int i = 1; i < imageData.size(); i++) {
